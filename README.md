@@ -1,6 +1,6 @@
 # Aganon Audio
 
-A minimal audio tool by Aganon Labs, available locally or on Render. The app for converting YouTube or SoundCloud tracks to 192 kbps MP3. SoundCloud playlists can be combined into one MP3 in playlist order.
+A minimal audio tool. The app is for converting YouTube or SoundCloud tracks to 192 kbps MP3. SoundCloud playlists can be combined into one MP3 in playlist order.
 
 ## Run
 
