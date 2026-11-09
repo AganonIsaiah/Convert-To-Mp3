@@ -6,6 +6,8 @@ services:
     branch: main
     dockerfilePath: ./Dockerfile
     dockerContext: .
+    domains:
+      - audio.aganonlabs.com
     healthCheckPath: /health
     envVars:
       - key: MAX_CONCURRENT_JOBS

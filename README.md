@@ -1,6 +1,6 @@
-# Side A — audio downloader
+# Aganon Audio
 
-A local web app for converting YouTube or SoundCloud tracks to 192 kbps MP3. SoundCloud playlists can be combined into one MP3 in playlist order.
+A minimal audio tool by Aganon Labs, available locally or on Render. The app for converting YouTube or SoundCloud tracks to 192 kbps MP3. SoundCloud playlists can be combined into one MP3 in playlist order.
 
 ## Run
 
@@ -49,3 +49,7 @@ docker run --rm -p 8000:10000 side-a
 Render's free instances sleep after inactivity and lose temporary files and in-memory jobs on sleep, restart, or redeployment. Download finished files before leaving. Media providers may reject cloud datacenter IPs or require authentication; deployment cannot guarantee every YouTube or SoundCloud URL will work.
 
 The browser requests `/health` immediately on page load, retries startup failures, and enables conversion when the server is ready. Render must serve the page before its JavaScript can run, so the first visit to a sleeping instance still has a cold-start delay. This is a bounded startup check, not a periodic keep-alive.
+
+## Custom domain
+
+The production hostname is `audio.aganonlabs.com`. In Namecheap Advanced DNS, the `audio` host uses a CNAME pointing to `side-a-mp3.onrender.com`. Render manages HTTPS certificates. The domain is also declared in `render.yaml`.
