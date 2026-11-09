@@ -23,6 +23,7 @@
     <main>
       <h1>Convert to MP3.</h1>
       <p class="intro">Download a track, or bring a whole playlist together.</p>
+      <div class="connection" role="status" aria-live="polite"><span id="connection-text">Connecting to the server…</span> <button id="connection-retry" type="button" hidden>Try again</button></div>
       <section class="converter" aria-label="Audio converter">
         <div class="tabs" role="group" aria-label="Conversion mode">
           <button class="tab active" data-mode="track" aria-pressed="true">
@@ -45,7 +46,7 @@
             <span id="hint">YouTube or SoundCloud</span
             ><span>MP3 · 192 kbps</span>
           </div>
-          <button id="convert" class="primary" type="submit">
+          <button id="convert" class="primary" type="submit" disabled>
             Convert to MP3 <span aria-hidden="true">↗</span>
           </button>
         </form>

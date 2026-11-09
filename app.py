@@ -1,7 +1,5 @@
 """Local audio downloader. Run with: .venv/bin/python app.py"""
 
-import base64
-import hmac
 import json
 import os
 import re
@@ -178,20 +176,6 @@ def convert(job_id, url, playlist):
 
 
 class Handler(BaseHTTPRequestHandler):
-    def authorized(self):
-        password = os.environ.get("APP_PASSWORD")
-        if not password:
-            return True
-        expected = base64.b64encode(f"sidea:{password}".encode()).decode()
-        supplied = self.headers.get("Authorization", "")
-        if hmac.compare_digest(supplied.encode(), f"Basic {expected}".encode()):
-            return True
-        self.send_response(401)
-        self.send_header("WWW-Authenticate", 'Basic realm="Side A", charset="UTF-8"')
-        self.send_header("Content-Length", "0")
-        self.end_headers()
-        return False
-
     def json(self, status, data):
         raw = json.dumps(data).encode()
         self.send_response(status)
@@ -201,8 +185,6 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(raw)
 
     def do_POST(self):
-        if not self.authorized():
-            return
         if self.path != "/api/jobs":
             return self.json(404, {"error": "Not found"})
         # Do not allow other websites to submit work to this local service.
@@ -246,8 +228,6 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/health":
             ready = bool(shutil.which("ffmpeg")) and DOWNLOADS.is_dir()
             return self.json(200 if ready else 503, {"status": "ok" if ready else "unavailable"})
-        if not self.authorized():
-            return
         match = re.fullmatch(r"/api/jobs/([a-f0-9]{32})(/download)?", self.path)
         if match:
             with LOCK:
@@ -314,8 +294,6 @@ def cleanup():
 
 
 if __name__ == "__main__":
-    if os.environ.get("RENDER") == "true" and not os.environ.get("APP_PASSWORD"):
-        raise SystemExit("Set APP_PASSWORD before deploying on Render.")
     DOWNLOADS.mkdir(exist_ok=True)
     # Old jobs cannot be resumed after a server restart.
     for old in DOWNLOADS.iterdir():

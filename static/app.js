@@ -6,6 +6,42 @@ const message = document.querySelector("#status-text");
 const download = document.querySelector("#download");
 let mode = "track";
 let busy = false;
+let ready = false;
+let connecting = false;
+const connectionText = document.querySelector("#connection-text");
+const connectionRetry = document.querySelector("#connection-retry");
+async function wakeServer() {
+  if (connecting) return;
+  connecting = true;
+  ready = false;
+  button.disabled = true;
+  connectionRetry.hidden = true;
+  connectionText.textContent = "Connecting to the server…";
+  for (let attempt = 0; attempt < 12; attempt++) {
+    try {
+      const response = await fetch("/health", {
+        cache: "no-store",
+        signal: AbortSignal.timeout(8000),
+      });
+      if (response.ok && (await response.json()).status === "ok") {
+        ready = true;
+        connecting = false;
+        connectionText.textContent = "Ready";
+        button.disabled = busy;
+        return;
+      }
+    } catch (_) {
+      // A sleeping service or a brief network failure can recover on the next attempt.
+    }
+    connectionText.textContent = "Starting up the server. This can take about a minute…";
+    if (attempt < 11) await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+  connecting = false;
+  connectionText.textContent = "Couldn’t reach the server. Please try again.";
+  connectionRetry.hidden = false;
+}
+connectionRetry.addEventListener("click", wakeServer);
+wakeServer();
 document.querySelectorAll(".tab").forEach((tab) =>
   tab.addEventListener("click", () => {
     if (busy) return;
@@ -39,7 +75,7 @@ async function api(url, options) {
 }
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  if (busy) return;
+  if (busy || !ready) return;
   busy = true;
   button.disabled = true;
   button.textContent = "Converting…";
@@ -81,7 +117,7 @@ form.addEventListener("submit", async (event) => {
     document.querySelector("#percent").textContent = "";
   } finally {
     busy = false;
-    button.disabled = false;
+    button.disabled = !ready;
     button.innerHTML = "Convert to MP3 <span>↗</span>";
   }
 });

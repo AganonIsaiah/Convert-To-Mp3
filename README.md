@@ -42,8 +42,10 @@ docker build -t side-a .
 docker run --rm -p 8000:10000 side-a
 ```
 
-`render.yaml` creates one **free** Docker web service, with one conversion at a time and no paid database or persistent disk. Render generates `APP_PASSWORD`. When opening the deployed app, use username **sidea** and the password from the service's **Environment → APP_PASSWORD** setting. Do not share or commit the password. The health endpoint `/health` is public and contains no job information.
+`render.yaml` creates one **free** Docker web service, with one conversion at a time and no paid database or persistent disk. The page and conversion API are public and do not require a password. The health endpoint `/health` is public and contains no job information.
 
-`HOST` defaults to `127.0.0.1` locally and `0.0.0.0` in Docker. `PORT` is supplied by Render. Set `APP_PASSWORD` to enable browser HTTP Basic authentication locally, too. On Render the app refuses to start without it. Optional `PUBLIC_ORIGIN` restricts submissions to an exact origin; otherwise HTTP and HTTPS on the request host are accepted.
+`HOST` defaults to `127.0.0.1` locally and `0.0.0.0` in Docker. `PORT` is supplied by Render. Optional `PUBLIC_ORIGIN` restricts submissions to an exact origin; otherwise HTTP and HTTPS on the request host are accepted.
 
 Render's free instances sleep after inactivity and lose temporary files and in-memory jobs on sleep, restart, or redeployment. Download finished files before leaving. Media providers may reject cloud datacenter IPs or require authentication; deployment cannot guarantee every YouTube or SoundCloud URL will work.
+
+The browser requests `/health` immediately on page load, retries startup failures, and enables conversion when the server is ready. Render must serve the page before its JavaScript can run, so the first visit to a sleeping instance still has a cold-start delay. This is a bounded startup check, not a periodic keep-alive.

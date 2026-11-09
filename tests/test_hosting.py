@@ -33,9 +33,9 @@ class HostingTests(unittest.TestCase):
         except HTTPError as error:
             return error
 
-    def test_authentication_required_for_page_and_jobs(self):
-        self.assertEqual(self.request('/').code, 401)
-        self.assertEqual(self.request('/api/jobs', data=b'{}').code, 401)
+    def test_page_and_jobs_are_public_even_with_legacy_password(self):
+        self.assertEqual(self.request('/').code, 200)
+        self.assertEqual(self.request('/api/jobs', data=b'{}').code, 400)
         response = self.request('/', {'Authorization': self.auth})
         self.assertEqual(response.code, 200)
         response.close()

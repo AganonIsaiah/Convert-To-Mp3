@@ -262,3 +262,6 @@ a:focus-visible {
     margin-top: 65px;
   }
 }
+
+.connection { min-height: 20px; margin: -16px 0 16px; color: #888; font-size: 12px; line-height: 1.6; }
+#connection-retry { border: 0; background: transparent; padding: 0 0 0 5px; color: #222; text-decoration: underline; cursor: pointer; font: inherit; }

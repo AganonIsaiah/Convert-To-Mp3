@@ -8,7 +8,5 @@ services:
     dockerContext: .
     healthCheckPath: /health
     envVars:
-      - key: APP_PASSWORD
-        generateValue: true
       - key: MAX_CONCURRENT_JOBS
         value: "1"
