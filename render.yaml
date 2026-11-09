@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: side-a-mp3
+    runtime: docker
+    plan: free
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: APP_PASSWORD
+        generateValue: true
+      - key: MAX_CONCURRENT_JOBS
+        value: "1"

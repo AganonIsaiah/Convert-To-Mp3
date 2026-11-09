@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>MP3 Converter</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/" aria-label="Side A home"
+        ><img
+          class="brand-icon"
+          src="/favicon.svg"
+          width="40"
+          height="40"
+          alt="Side A record logo"
+        /></a
+      ><span class="local">Local audio downloader</span>
+    </header>
+    <main>
+      <h1>Convert to MP3.</h1>
+      <p class="intro">Download a track, or bring a whole playlist together.</p>
+      <section class="converter" aria-label="Audio converter">
+        <div class="tabs" role="group" aria-label="Conversion mode">
+          <button class="tab active" data-mode="track" aria-pressed="true">
+            Single track</button
+          ><button class="tab" data-mode="playlist" aria-pressed="false">
+            SoundCloud playlist
+          </button>
+        </div>
+        <form id="form">
+          <label for="url" id="link-label">Track link</label
+          ><input
+            id="url"
+            type="url"
+            placeholder="https://youtube.com/watch?v=…"
+            required
+            autocomplete="off"
+            aria-describedby="hint"
+          />
+          <div class="details">
+            <span id="hint">YouTube or SoundCloud</span
+            ><span>MP3 · 192 kbps</span>
+          </div>
+          <button id="convert" class="primary" type="submit">
+            Convert to MP3 <span aria-hidden="true">↗</span>
+          </button>
+        </form>
+        <div id="status" class="status" hidden>
+          <div class="progress-heading">
+            <span id="status-text" role="status" aria-live="polite"></span
+            ><span id="percent"></span>
+          </div>
+          <progress
+            id="progress"
+            max="100"
+            aria-label="Audio conversion progress"
+          ></progress
+          ><a id="download" class="primary" hidden
+            >Download MP3 <span aria-hidden="true">↓</span></a
+          >
+        </div>
+      </section>
+      <p class="note" id="mode-note">
+        Paste a link above. Your MP3 will be ready to save here.
+      </p>
+    </main>
+    <footer>Only download audio you own or have permission to download.</footer>
+    <script src="/app.js"></script>
+  </body>
+</html>

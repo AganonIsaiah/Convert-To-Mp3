@@ -32,3 +32,18 @@ Open http://localhost:8000. Paste a link, select single track or SoundCloud play
 
 Tests validate accepted URLs, reject unsupported URLs, and check playlist ordering and real FFmpeg concatenation using generated audio. They do not download third-party media.
 # Convert-To-Mp3
+
+## Docker and Render
+
+The Docker image includes Python 3.13, FFmpeg, Node.js 22 (for YouTube's JavaScript challenges), and yt-dlp's default dependencies. It runs as an unprivileged user.
+
+```sh
+docker build -t side-a .
+docker run --rm -p 8000:10000 side-a
+```
+
+`render.yaml` creates one **free** Docker web service, with one conversion at a time and no paid database or persistent disk. Render generates `APP_PASSWORD`. When opening the deployed app, use username **sidea** and the password from the service's **Environment → APP_PASSWORD** setting. Do not share or commit the password. The health endpoint `/health` is public and contains no job information.
+
+`HOST` defaults to `127.0.0.1` locally and `0.0.0.0` in Docker. `PORT` is supplied by Render. Set `APP_PASSWORD` to enable browser HTTP Basic authentication locally, too. On Render the app refuses to start without it. Optional `PUBLIC_ORIGIN` restricts submissions to an exact origin; otherwise HTTP and HTTPS on the request host are accepted.
+
+Render's free instances sleep after inactivity and lose temporary files and in-memory jobs on sleep, restart, or redeployment. Download finished files before leaving. Media providers may reject cloud datacenter IPs or require authentication; deployment cannot guarantee every YouTube or SoundCloud URL will work.
