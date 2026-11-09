@@ -16,6 +16,7 @@ Open http://localhost:8000. Paste a link, select single track or SoundCloud play
 
 ## Behavior and limits
 
+- Conversion progress shows elapsed time and approximate time remaining when measurable progress is available; during preparation and merging, the estimate is recalculated.
 - Single track mode ignores playlists attached to YouTube links.
 - Playlist mode processes SoundCloud playlists only, joins tracks in their original order, and fails if a required track cannot be downloaded. It does not silently skip unavailable tracks.
 - Playlists are limited to 100 tracks, each source download to 500 MB, and each conversion stage to one hour. Two conversions can run at once.
@@ -42,13 +43,13 @@ docker build -t side-a .
 docker run --rm -p 8000:10000 side-a
 ```
 
-`render.yaml` creates one **free** Docker web service, with one conversion at a time and no paid database or persistent disk. The page and conversion API are public and do not require a password. The health endpoint `/health` is public and contains no job information.
+`render.yaml` creates one **free** Docker web service, with one conversion at a time and no paid database or persistent disk. The page and conversion API are public and do not require a password. The health endpoint `/api/health` (also available at `/health`) is public and contains no job information.
 
 `HOST` defaults to `127.0.0.1` locally and `0.0.0.0` in Docker. `PORT` is supplied by Render. Optional `PUBLIC_ORIGIN` restricts submissions to an exact origin; otherwise HTTP and HTTPS on the request host are accepted.
 
 Render's free instances sleep after inactivity and lose temporary files and in-memory jobs on sleep, restart, or redeployment. Download finished files before leaving. Media providers may reject cloud datacenter IPs or require authentication; deployment cannot guarantee every YouTube or SoundCloud URL will work.
 
-The browser requests `/health` immediately on page load, retries startup failures, and enables conversion when the server is ready. Render must serve the page before its JavaScript can run, so the first visit to a sleeping instance still has a cold-start delay. This is a bounded startup check, not a periodic keep-alive.
+The browser requests `/api/health` immediately on page load, retries startup failures, and enables conversion when the server is ready. Render must serve the page before its JavaScript can run, so the first visit to a sleeping instance still has a cold-start delay. This is a bounded startup check, not a periodic keep-alive.
 
 ## Custom domain
 

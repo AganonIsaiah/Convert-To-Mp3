@@ -46,6 +46,23 @@ class HostingTests(unittest.TestCase):
             self.assertEqual(response.code, 200)
             self.assertEqual(json.load(response)['status'], 'ok')
 
+    def test_health_routes_support_get_head_and_query_strings(self):
+        with tempfile.TemporaryDirectory() as directory, patch.object(app, 'DOWNLOADS', Path(directory)), patch.object(app.shutil, 'which', return_value='/usr/bin/ffmpeg'):
+            for path in ['/api/health', '/health', '/api/health/?check=1']:
+                with self.subTest(path=path):
+                    with self.request(path) as response:
+                        self.assertEqual(response.code, 200)
+                        self.assertEqual(json.load(response)['status'], 'ok')
+                    with urlopen(Request(self.base + path, method='HEAD')) as response:
+                        self.assertEqual(response.code, 200)
+                        self.assertEqual(response.read(), b'')
+
+    def test_health_reports_unavailable_dependencies(self):
+        with patch.object(app.shutil, 'which', return_value=None):
+            with self.request('/api/health') as response:
+                self.assertEqual(response.code, 503)
+                self.assertEqual(json.load(response)['status'], 'unavailable')
+
     def test_https_origin_accepted_behind_proxy(self):
         headers = {'Authorization': self.auth, 'Origin': 'https://side-a.example', 'Host': 'side-a.example', 'Content-Type': 'application/json'}
         # An invalid source URL produces 400, proving HTTPS was not rejected with 403.

@@ -182,7 +182,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(raw)))
         self.end_headers()
-        self.wfile.write(raw)
+        if self.command != "HEAD":
+            self.wfile.write(raw)
 
     def do_POST(self):
         if self.path != "/api/jobs":
@@ -224,8 +225,13 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, TypeError, AttributeError) as exc:
             self.json(400, {"error": str(exc)})
 
+    def do_HEAD(self):
+        if urlparse(self.path).path.rstrip("/") in {"/health", "/api/health"}:
+            return self.do_GET()
+        return self.json(404, {"error": "Not found"})
+
     def do_GET(self):
-        if self.path == "/health":
+        if urlparse(self.path).path.rstrip("/") in {"/health", "/api/health"}:
             ready = bool(shutil.which("ffmpeg")) and DOWNLOADS.is_dir()
             return self.json(200 if ready else 503, {"status": "ok" if ready else "unavailable"})
         match = re.fullmatch(r"/api/jobs/([a-f0-9]{32})(/download)?", self.path)

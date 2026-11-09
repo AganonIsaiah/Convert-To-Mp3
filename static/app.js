@@ -19,7 +19,7 @@ async function wakeServer() {
   connectionText.textContent = "Connecting to the server…";
   for (let attempt = 0; attempt < 12; attempt++) {
     try {
-      const response = await fetch("/health", {
+      const response = await fetch("/api/health", {
         cache: "no-store",
         signal: AbortSignal.timeout(8000),
       });
@@ -73,6 +73,16 @@ async function api(url, options) {
     throw new Error(data.error || "Something went wrong. Please try again.");
   return data;
 }
+function formatDuration(seconds) {
+  seconds = Math.max(0, Math.ceil(seconds));
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainder = String(seconds % 60).padStart(2, "0");
+  return hours
+    ? `${hours}:${String(minutes).padStart(2, "0")}:${remainder}`
+    : `${minutes}:${remainder}`;
+}
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (busy || !ready) return;
@@ -85,6 +95,19 @@ form.addEventListener("submit", async (event) => {
   message.textContent = "Starting conversion…";
   document.querySelector("#progress").removeAttribute("value");
   document.querySelector("#percent").textContent = "";
+  const started = performance.now();
+  const elapsed = document.querySelector("#elapsed");
+  const remaining = document.querySelector("#remaining");
+  let estimatedFinish = null;
+  let finished = false;
+  function renderTiming() {
+    elapsed.textContent = `Elapsed: ${formatDuration((performance.now() - started) / 1000)}`;
+    remaining.textContent = finished ? "Complete" : estimatedFinish === null
+      ? "Time remaining: estimating…"
+      : `Estimated remaining: ${formatDuration(Math.max(1, (estimatedFinish - performance.now()) / 1000))}`;
+  }
+  renderTiming();
+  const timer = setInterval(renderTiming, 1000);
   try {
     const job = await api("/api/jobs", {
       method: "POST",
@@ -94,6 +117,14 @@ form.addEventListener("submit", async (event) => {
     while (true) {
       const progress = await api(`/api/jobs/${job.id}`);
       message.textContent = progress.message;
+      // Progress includes a reserved share for conversion; this is an approximate
+      // whole-job estimate. Recalculate when a stage has no measurable progress.
+      const fraction = progress.progress / 100;
+      estimatedFinish = typeof progress.progress === "number" && fraction > 0 && fraction < 1
+        ? performance.now() + (performance.now() - started) * (1 - fraction) / fraction
+        : null;
+      finished = progress.status === "done";
+      renderTiming();
       const bar = document.querySelector("#progress");
       const percent = document.querySelector("#percent");
       if (typeof progress.progress === "number") {
@@ -116,6 +147,9 @@ form.addEventListener("submit", async (event) => {
     message.textContent = error.message;
     document.querySelector("#percent").textContent = "";
   } finally {
+    clearInterval(timer);
+    renderTiming();
+    if (!finished) remaining.textContent = "Time remaining: unavailable";
     busy = false;
     button.disabled = !ready;
     button.innerHTML = "Convert to MP3 <span>↗</span>";

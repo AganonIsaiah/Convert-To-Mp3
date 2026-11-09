@@ -61,7 +61,12 @@
             max="100"
             aria-label="Audio conversion progress"
           ></progress
-          ><a id="download" class="primary" hidden
+          >
+          <div class="timing">
+            <span id="elapsed">Elapsed: 0:00</span>
+            <span id="remaining">Time remaining: estimating…</span>
+          </div>
+          <a id="download" class="primary" hidden
             >Download MP3 <span aria-hidden="true">↓</span></a
           >
         </div>

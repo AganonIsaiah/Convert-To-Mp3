@@ -269,3 +269,14 @@ a:focus-visible {
 .wordmark { font-size: 18px; font-weight: 550; letter-spacing: -.6px; }
 .wordmark span { color: #888; font-weight: 400; }
 .footer-brand { display: block; color: #555; margin-bottom: 8px; }
+
+.timing {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 16px;
+  margin-top: 12px;
+  color: #888;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
